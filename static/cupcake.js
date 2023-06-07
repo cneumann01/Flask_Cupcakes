@@ -15,16 +15,19 @@ $(document).ready(() => {
 				} else {
 					cupcakes.forEach((cupcake) => {
 						const listItem = `<li class="list-group-item">
-                <div class="row">
-                <div class="col-2">
-                    <img src="${cupcake.image}" alt="Cupcake Image" class="img-fluid">
-                </div>
-                <div class="col-10">
-                    <strong>${cupcake.flavor}</strong> -
-                    Size: ${cupcake.size}, Rating: ${cupcake.rating}
-                </div>
-                </div>
-                </li>`;
+				<div class="row">
+				<div class="col-2">
+					<img src="${cupcake.image}" alt="Cupcake Image" class="img-fluid">
+				</div>
+				<div class="col-8">
+					<strong>${cupcake.flavor}</strong> -
+					Size: ${cupcake.size}, Rating: ${cupcake.rating}
+				</div>
+				<div class="col-2">
+					<button class="btn btn-danger btn-sm delete-cupcake" data-cupcake-id="${cupcake.id}">Delete</button>
+				</div>
+				</div>
+				</li>`;
 						cupcakeList.append(listItem);
 					});
 				}
@@ -47,16 +50,15 @@ $(document).ready(() => {
 			size,
 			rating,
 		};
-        if (image) {
-            newCupcake.image = image;
-        }
+		if (image) {
+			newCupcake.image = image;
+		}
 
 		axios
 			.post("/api/cupcakes", newCupcake)
 			.then((response) => {
 				console.log("Cupcake added:", response.data.cupcake);
 				fetchCupcakes(); // Refresh the cupcake list after successful submission
-				// Clear the form inputs
 				$("#flavor").val("");
 				$("#size").val("");
 				$("#rating").val("");
@@ -65,6 +67,24 @@ $(document).ready(() => {
 			.catch((error) => {
 				console.error(error);
 			});
+	});
+
+	// Event listener for deleting a cupcake
+	$("#cupcake-list").on("click", ".delete-cupcake", (event) => {
+		const cupcakeId = $(event.currentTarget).data("cupcake-id");
+
+		// Show confirmation message before deleting the cupcake
+		if (confirm("Are you sure you want to delete this cupcake?")) {
+			axios
+				.delete(`/api/cupcakes/${cupcakeId}`)
+				.then((response) => {
+					console.log("Cupcake deleted:", response.data.message);
+					fetchCupcakes(); // Refresh the cupcake list after successful deletion
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+		}
 	});
 
 	// Initial fetch of cupcakes when the page loads
